@@ -1,4 +1,4 @@
-import { moveCard, type Column } from "@/lib/kanban";
+import { createId, moveCard, type Column } from "@/lib/kanban";
 
 describe("moveCard", () => {
   const baseColumns: Column[] = [
@@ -21,5 +21,24 @@ describe("moveCard", () => {
     const result = moveCard(baseColumns, "card-1", "col-b");
     expect(result[0].cardIds).toEqual(["card-2"]);
     expect(result[1].cardIds).toEqual(["card-3", "card-1"]);
+  });
+
+  it("keeps columns unchanged for unknown cards", () => {
+    expect(moveCard(baseColumns, "missing-card", "card-1")).toBe(baseColumns);
+  });
+
+  it("does not change the order when dropped on the same card", () => {
+    expect(moveCard(baseColumns, "card-1", "card-1")).toBe(baseColumns);
+  });
+});
+
+describe("createId", () => {
+  it("creates a prefixed unique ID", () => {
+    const first = createId("card");
+    const second = createId("card");
+
+    expect(first).toMatch(/^card-/);
+    expect(second).toMatch(/^card-/);
+    expect(first).not.toBe(second);
   });
 });

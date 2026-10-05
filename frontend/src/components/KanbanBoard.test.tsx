@@ -22,25 +22,44 @@ describe("KanbanBoard", () => {
   it("adds and removes a card", async () => {
     render(<KanbanBoard />);
     const column = getFirstColumn();
-    const addButton = within(column).getByRole("button", {
-      name: /add a card/i,
-    });
-    await userEvent.click(addButton);
+    const user = userEvent.setup();
+    await user.click(within(column).getByRole("button", { name: /add a card/i }));
 
     const titleInput = within(column).getByPlaceholderText(/card title/i);
-    await userEvent.type(titleInput, "New card");
+    await user.type(titleInput, "New card");
     const detailsInput = within(column).getByPlaceholderText(/details/i);
-    await userEvent.type(detailsInput, "Notes");
+    await user.type(detailsInput, "Notes");
 
-    await userEvent.click(within(column).getByRole("button", { name: /add card/i }));
+    await user.click(within(column).getByRole("button", { name: /add card/i }));
 
     expect(within(column).getByText("New card")).toBeInTheDocument();
 
     const deleteButton = within(column).getByRole("button", {
       name: /delete new card/i,
     });
-    await userEvent.click(deleteButton);
+    await user.click(deleteButton);
 
     expect(within(column).queryByText("New card")).not.toBeInTheDocument();
+  });
+
+  it("adds the default details when the details are blank", async () => {
+    render(<KanbanBoard />);
+    const column = getFirstColumn();
+    const user = userEvent.setup();
+    await user.click(within(column).getByRole("button", { name: /add a card/i }));
+    await user.type(within(column).getByPlaceholderText(/card title/i), "Details fallback");
+    await user.click(within(column).getByRole("button", { name: /add card/i }));
+
+    expect(within(column).getByText("No details yet.")).toBeInTheDocument();
+  });
+
+  it("cancels adding a card", async () => {
+    render(<KanbanBoard />);
+    const column = getFirstColumn();
+    const user = userEvent.setup();
+    await user.click(within(column).getByRole("button", { name: /add a card/i }));
+    await user.click(within(column).getByRole("button", { name: /cancel/i }));
+
+    expect(within(column).getByRole("button", { name: /add a card/i })).toBeInTheDocument();
   });
 });
