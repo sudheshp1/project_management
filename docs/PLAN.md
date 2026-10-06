@@ -116,14 +116,14 @@
 - Browser integration-test login, persistent mutation, refresh, and logout against the running backend.
 - Focused frontend unit and browser integration tests cover persistence, loading, and error behavior.
 
-## Part 8: OpenRouter connectivity
+## Part 8: OpenRouter connectivity (Complete)
 
 ### Checklist
 
-- [ ] Add a server-side OpenRouter client configured from `OPENROUTER_API_KEY`.
-- [ ] Use `openai/gpt-oss-120b`.
-- [ ] Keep the key out of source control, logs, and responses.
-- [ ] Add a scoped live `2+2` connectivity check for configured local environments.
+- [x] Add a server-side OpenRouter client configured from `OPENROUTER_API_KEY`.
+- [x] Use `openai/gpt-oss-120b`.
+- [x] Keep the key out of source control, logs, and responses.
+- [x] Add a scoped live `2+2` connectivity check for configured local environments.
 
 ### Tests and success criteria
 

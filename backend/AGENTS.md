@@ -15,11 +15,14 @@ Persistence lives in `app/db.py` (SQLite via the standard library; schema in `do
 
 Unknown ids and other users' cards return 404. Tests get a fresh database per test through the fixtures in `tests/conftest.py`.
 
+The OpenRouter client is `app/ai.py`: `complete(messages, response_format=None)` calls `openai/gpt-oss-120b` with `OPENROUTER_API_KEY` from the environment and returns the reply text. It raises `AINotConfigured` when the key is missing and `AIError` for upstream, network, or malformed-response failures; error messages never include the key. Docker Compose passes the root `.env` to the container; locally use `uv run --env-file ../.env ...`. Unit tests mock HTTP with `httpx.MockTransport` (the `transport` argument). The live check in `tests/test_ai_live.py` is deselected by default.
+
 ## Commands
 
 ```bash
 uv sync --all-groups
 uv run pytest
+uv run --env-file ../.env pytest -m live   # live OpenRouter 2+2 check
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 

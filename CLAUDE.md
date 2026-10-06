@@ -39,6 +39,7 @@ Backend (run in `backend/`):
 uv sync --all-groups
 uv run pytest
 uv run pytest tests/test_main.py::test_health_returns_ok
+uv run --env-file ../.env pytest -m live      # live OpenRouter check (deselected by default)
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
@@ -52,7 +53,8 @@ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 - The frontend is a static client-side app: no Next.js server features (API routes, SSR, server actions) are available at runtime, since only the exported files are served. It must talk to the backend via `/api/*` fetches; during `next dev`, `next.config.ts` proxies `/api/*` to the backend on :8000.
 - `KanbanBoard` loads the board from the API and saves every mutation through `src/lib/api.ts`; each call returns the full board, which replaces local state (optimistic updates roll back on failure). `src/lib/kanban.ts` owns the `BoardData` shape (`columns` with ordered `cardIds`, plus a `cards` map) and the pure card-move logic; keep board logic there, separate from components.
 - Persistence: SQLite in `backend/app/db.py` (schema and design in `docs/database-schema.json` and `docs/DATABASE.md`), created on startup at `backend/data/app.db` (`/app/data` is a named volume in Docker). Board routes under `/api/board`, `/api/columns`, `/api/cards` return the full board in the frontend `BoardData` shape; route list in `backend/AGENTS.md`.
-- Planned (see `docs/PLAN.md`): an AI chat sidebar that calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env`, returning structured output that can create/edit/move cards.
+- AI: `backend/app/ai.py` calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env` (passed to the container via `env_file` in `compose.yaml`; never baked into the image).
+- Planned (see `docs/PLAN.md`): a chat endpoint returning structured output that can create/edit/move cards, and an AI chat sidebar.
 
 ## Conventions
 

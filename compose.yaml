@@ -4,6 +4,9 @@ services:
       context: .
     ports:
       - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
     volumes:
       - app-data:/app/data
 
