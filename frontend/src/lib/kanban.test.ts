@@ -1,4 +1,4 @@
-import { createId, moveCard, type Column } from "@/lib/kanban";
+import { findCardPosition, moveCard, type Column } from "@/lib/kanban";
 
 describe("moveCard", () => {
   const baseColumns: Column[] = [
@@ -32,13 +32,18 @@ describe("moveCard", () => {
   });
 });
 
-describe("createId", () => {
-  it("creates a prefixed unique ID", () => {
-    const first = createId("card");
-    const second = createId("card");
+describe("findCardPosition", () => {
+  const columns: Column[] = [
+    { id: "col-a", title: "A", cardIds: ["card-1", "card-2"] },
+    { id: "col-b", title: "B", cardIds: ["card-3"] },
+  ];
 
-    expect(first).toMatch(/^card-/);
-    expect(second).toMatch(/^card-/);
-    expect(first).not.toBe(second);
+  it("returns the column and index of a card", () => {
+    expect(findCardPosition(columns, "card-2")).toEqual({ columnId: "col-a", position: 1 });
+    expect(findCardPosition(columns, "card-3")).toEqual({ columnId: "col-b", position: 0 });
+  });
+
+  it("returns undefined for unknown cards", () => {
+    expect(findCardPosition(columns, "missing")).toBeUndefined();
   });
 });

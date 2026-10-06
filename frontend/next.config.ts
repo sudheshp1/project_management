@@ -6,7 +6,10 @@ const nextConfig = (phase: string): NextConfig => {
     // The FastAPI backend serves /api in production; proxy to it during development.
     return {
       rewrites: async () => [
-        { source: "/api/:path*", destination: "http://127.0.0.1:8000/api/:path*" },
+        {
+          source: "/api/:path*",
+          destination: `${process.env.BACKEND_URL ?? "http://127.0.0.1:8000"}/api/:path*`,
+        },
       ],
     };
   }

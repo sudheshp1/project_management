@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { LoginForm } from "@/components/LoginForm";
 import { getCurrentUser, logout } from "@/lib/auth";
@@ -12,6 +12,11 @@ export default function Home() {
     getCurrentUser().then(setUser);
   }, []);
 
+  const handleLogout = useCallback(async () => {
+    await logout();
+    setUser(null);
+  }, []);
+
   if (user === undefined) {
     return null;
   }
@@ -19,11 +24,6 @@ export default function Home() {
   if (user === null) {
     return <LoginForm onLogin={setUser} />;
   }
-
-  const handleLogout = async () => {
-    await logout();
-    setUser(null);
-  };
 
   return <KanbanBoard onLogout={handleLogout} />;
 }

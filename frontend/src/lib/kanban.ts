@@ -161,8 +161,9 @@ export const moveCard = (
   });
 };
 
-export const createId = (prefix: string) => {
-  const randomPart = Math.random().toString(36).slice(2, 8);
-  const timePart = Date.now().toString(36);
-  return `${prefix}-${randomPart}${timePart}`;
+export const findCardPosition = (columns: Column[], cardId: string) => {
+  const column = columns.find((item) => item.cardIds.includes(cardId));
+  return column
+    ? { columnId: column.id, position: column.cardIds.indexOf(cardId) }
+    : undefined;
 };

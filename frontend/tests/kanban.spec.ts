@@ -71,3 +71,49 @@ test("moves a card between columns", async ({ page }) => {
   await page.mouse.up();
   await expect(targetColumn.getByTestId("card-card-1")).toBeVisible();
 });
+
+test("persists board changes across refresh and sign-in", async ({ page }) => {
+  await signIn(page);
+  const discovery = page.getByTestId("column-col-discovery");
+  const title = discovery.getByLabel("Column title");
+  await title.fill("Research");
+  await title.press("Enter");
+  await discovery.getByRole("button", { name: /add a card/i }).click();
+  await discovery.getByPlaceholder("Card title").fill("Persisted card");
+  await discovery.getByRole("button", { name: /add card/i }).click();
+  await expect(discovery.getByText("Persisted card")).toBeVisible();
+  await discovery.getByRole("button", { name: "Delete Prototype analytics view", exact: true }).click();
+  await expect(discovery.getByText("Prototype analytics view")).toHaveCount(0);
+
+  await page.reload();
+  await expect(title).toHaveValue("Research");
+  await expect(discovery.getByText("Persisted card")).toBeVisible();
+  await expect(discovery.getByText("Prototype analytics view")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Log out" }).click();
+  await signIn(page);
+  await expect(title).toHaveValue("Research");
+  await expect(discovery.getByText("Persisted card")).toBeVisible();
+});
+
+test("persists a dragged card after refresh", async ({ page }) => {
+  await signIn(page);
+  const card = page.getByTestId("card-card-2");
+  const targetColumn = page.getByTestId("column-col-done");
+  const cardBox = await card.boundingBox();
+  const columnBox = await targetColumn.boundingBox();
+  if (!cardBox || !columnBox) {
+    throw new Error("Unable to resolve drag coordinates.");
+  }
+
+  await page.mouse.move(cardBox.x + cardBox.width / 2, cardBox.y + cardBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(columnBox.x + columnBox.width / 2, columnBox.y + columnBox.height - 40, {
+    steps: 12,
+  });
+  await page.mouse.up();
+  await expect(targetColumn.getByTestId("card-card-2")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByTestId("column-col-done").getByTestId("card-card-2")).toBeVisible();
+});

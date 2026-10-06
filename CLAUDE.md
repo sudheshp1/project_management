@@ -29,7 +29,7 @@ npm run test:unit                            # Vitest (jsdom), src/**/*.test.ts(
 npx vitest run src/lib/kanban.test.ts        # single test file
 npx vitest run -t "test name"                # single test by name
 npm run test:coverage
-npm run test:e2e                             # Playwright (Chromium); auto-starts backend and dev server
+npm run test:e2e                             # Playwright (Chromium); starts its own backend (:8001, fresh e2e.db) and dev server (:3001)
 npx playwright test tests/kanban.spec.ts -g "name"
 ```
 
@@ -50,9 +50,9 @@ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 - FastAPI (`backend/app/main.py`) serves API routes under `/api/` and mounts the static frontend at `/` last. All new API routes must stay under `/api/` and be registered before the static mount so they are not shadowed.
 - Auth: hardcoded `user` / `password`, an HttpOnly `session` cookie, and an in-memory session store in `backend/app/auth.py`. Protect API routes with `Depends(current_user)`. The frontend checks `/api/me` on load and shows the login form when it returns 401.
 - The frontend is a static client-side app: no Next.js server features (API routes, SSR, server actions) are available at runtime, since only the exported files are served. It must talk to the backend via `/api/*` fetches; during `next dev`, `next.config.ts` proxies `/api/*` to the backend on :8000.
-- Frontend state currently lives in React state inside `KanbanBoard`, seeded from `initialData` in `src/lib/kanban.ts`. `kanban.ts` owns the `BoardData` shape (`columns` with ordered `cardIds`, plus a `cards` map) and the pure card-move logic; keep board logic there, separate from components, so it can be swapped for backend data.
-- Persistence: SQLite in `backend/app/db.py` (schema and design in `docs/database-schema.json` and `docs/DATABASE.md`), created on startup at `backend/data/app.db` (`/app/data` is a named volume in Docker). Board routes under `/api/board`, `/api/columns`, `/api/cards` return the full board in the frontend `BoardData` shape; route list in `backend/AGENTS.md`. The frontend does not use them yet (Part 7).
-- Planned (see `docs/PLAN.md`): wiring the frontend to the board API, and an AI chat sidebar that calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env`, returning structured output that can create/edit/move cards.
+- `KanbanBoard` loads the board from the API and saves every mutation through `src/lib/api.ts`; each call returns the full board, which replaces local state (optimistic updates roll back on failure). `src/lib/kanban.ts` owns the `BoardData` shape (`columns` with ordered `cardIds`, plus a `cards` map) and the pure card-move logic; keep board logic there, separate from components.
+- Persistence: SQLite in `backend/app/db.py` (schema and design in `docs/database-schema.json` and `docs/DATABASE.md`), created on startup at `backend/data/app.db` (`/app/data` is a named volume in Docker). Board routes under `/api/board`, `/api/columns`, `/api/cards` return the full board in the frontend `BoardData` shape; route list in `backend/AGENTS.md`.
+- Planned (see `docs/PLAN.md`): an AI chat sidebar that calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env`, returning structured output that can create/edit/move cards.
 
 ## Conventions
 

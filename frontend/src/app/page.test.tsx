@@ -2,26 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import Home from "@/app/page";
-
-const mockApi = (signedIn: boolean) => {
-  let session = signedIn;
-  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    if (url === "/api/login") {
-      const { username, password } = JSON.parse(init?.body as string);
-      session = username === "user" && password === "password";
-      return Response.json({ username }, { status: session ? 200 : 401 });
-    }
-    if (url === "/api/logout") {
-      session = false;
-      return new Response(null, { status: 204 });
-    }
-    return session
-      ? Response.json({ username: "user" })
-      : Response.json({ detail: "Not authenticated" }, { status: 401 });
-  });
-  vi.stubGlobal("fetch", fetchMock);
-  return fetchMock;
-};
+import { mockApi } from "@/test/mockApi";
 
 const signIn = async (password: string) => {
   const user = userEvent.setup();
@@ -36,7 +17,7 @@ afterEach(() => {
 
 describe("Home", () => {
   it("shows the login form when signed out", async () => {
-    mockApi(false);
+    mockApi({ signedIn: false });
     render(<Home />);
 
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
@@ -44,14 +25,14 @@ describe("Home", () => {
   });
 
   it("restores an existing session", async () => {
-    mockApi(true);
+    mockApi();
     render(<Home />);
 
     expect(await screen.findByRole("heading", { name: "Kanban Studio" })).toBeInTheDocument();
   });
 
   it("rejects invalid credentials", async () => {
-    mockApi(false);
+    mockApi({ signedIn: false });
     render(<Home />);
 
     await signIn("wrong");
@@ -61,7 +42,7 @@ describe("Home", () => {
   });
 
   it("signs in and logs out", async () => {
-    const fetchMock = mockApi(false);
+    const { fetchMock } = mockApi({ signedIn: false });
     render(<Home />);
 
     await signIn("password");

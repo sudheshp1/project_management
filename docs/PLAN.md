@@ -101,14 +101,14 @@
 - Integration-test a fresh database, CRUD, ordering, validation failures, auth, and user isolation.
 - Focused backend unit and integration tests cover the supported board operations.
 
-## Part 7: Persistent frontend integration
+## Part 7: Persistent frontend integration (Complete)
 
 ### Checklist
 
-- [ ] Replace in-memory state with the authenticated backend API.
-- [ ] Add loading and error states.
-- [ ] Persist all board mutations through the API.
-- [ ] Preserve updates after browser refresh.
+- [x] Replace in-memory state with the authenticated backend API.
+- [x] Add loading and error states.
+- [x] Persist all board mutations through the API.
+- [x] Preserve updates after browser refresh.
 
 ### Tests and success criteria
 
