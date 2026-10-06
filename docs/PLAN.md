@@ -85,15 +85,15 @@
 - Validate the JSON schema is complete and internally consistent.
 - Do not start persistence implementation until the schema is approved.
 
-## Part 6: Persistent backend API
+## Part 6: Persistent backend API (Complete)
 
 ### Checklist
 
-- [ ] Create SQLite automatically when absent.
-- [ ] Implement authenticated routes to read and mutate a user's board.
-- [ ] Support column renames, card create/edit/delete, movement, and ordering.
-- [ ] Reject malformed input and cross-user access.
-- [ ] Separate database access and API schemas from route handlers.
+- [x] Create SQLite automatically when absent.
+- [x] Implement authenticated routes to read and mutate a user's board.
+- [x] Support column renames, card create/edit/delete, movement, and ordering.
+- [x] Reject malformed input and cross-user access.
+- [x] Separate database access and API schemas from route handlers.
 
 ### Tests and success criteria
 

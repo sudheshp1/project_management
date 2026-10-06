@@ -21,7 +21,7 @@ Card `position` is 0-based and contiguous within a column. A move or delete rewr
 
 - The database file is `data/app.db` under the backend directory (`/app/data/app.db` in the container), overridable with the `DATABASE_PATH` environment variable.
 - On startup the backend creates the directory and file if missing, enables `PRAGMA foreign_keys = ON` on every connection, and creates the tables if they do not exist.
-- On first sign-in, the backend creates the user row if missing. When the user has no board, it creates the board, the five seed columns, and the sample cards from `initialData` in one transaction.
+- On a user's first board request, the backend creates the user row if missing. When the user has no board, it creates the board, the five seed columns, and the sample cards from `initialData` in one transaction.
 - `docker compose` mounts a named volume at `/app/data` so the board survives container rebuilds. `data/` is git-ignored.
 
 ## Ownership boundaries
