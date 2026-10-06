@@ -15,7 +15,9 @@ Persistence lives in `app/db.py` (SQLite via the standard library; schema in `do
 
 Unknown ids and other users' cards return 404. Tests get a fresh database per test through the fixtures in `tests/conftest.py`.
 
-The OpenRouter client is `app/ai.py`: `complete(messages, response_format=None)` calls `openai/gpt-oss-120b` with `OPENROUTER_API_KEY` from the environment and returns the reply text. It raises `AINotConfigured` when the key is missing and `AIError` for upstream, network, or malformed-response failures; error messages never include the key. Docker Compose passes the root `.env` to the container; locally use `uv run --env-file ../.env ...`. Unit tests mock HTTP with `httpx.MockTransport` (the `transport` argument). The live check in `tests/test_ai_live.py` is deselected by default.
+The OpenRouter client is `app/ai.py`: `complete(messages, response_format=None)` calls `openai/gpt-oss-120b` with `OPENROUTER_API_KEY` from the environment and returns the reply text. It raises `AINotConfigured` when the key is missing and `AIError` for upstream, network, or malformed-response failures; error messages never include the key. Docker Compose passes the root `.env` to the container; locally use `uv run --env-file ../.env ...`. Unit tests mock HTTP with `httpx.MockTransport` (the `transport` argument). The live checks in `tests/test_ai_live.py` are deselected by default.
+
+AI chat lives in `app/chat.py`, exposed as `POST /api/chat` with `{history: [{role, content}], message}` (history is held by the client; roles are `user` or `assistant`). It sends the system prompt with the board JSON, the history, and the message, requesting the strict JSON schema in `RESPONSE_FORMAT`: `{reply, operations}`, where each operation is `create`, `update`, or `move` with all fields present (null when unused). Every operation is validated against the signed-in user's board before any is applied; one invalid operation rejects the whole response. Returns `{reply, board}`. Errors: 503 when the key is missing, 502 for upstream failures or invalid model output. Tests replace `ai.complete` with a fake.
 
 ## Commands
 

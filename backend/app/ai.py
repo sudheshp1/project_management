@@ -28,6 +28,8 @@ def complete(
     payload: dict = {"model": MODEL, "messages": messages}
     if response_format is not None:
         payload["response_format"] = response_format
+        # Route only to providers that honor the response format.
+        payload["provider"] = {"require_parameters": True}
 
     try:
         with httpx.Client(transport=transport, timeout=TIMEOUT_SECONDS) as client:

@@ -131,14 +131,14 @@
 - Integration-test missing-key and upstream-error behavior with mocks.
 - The explicit configured live check correctly answers `2+2`.
 
-## Part 9: Structured AI board operations
+## Part 9: Structured AI board operations (Complete)
 
 ### Checklist
 
-- [ ] Send board JSON, conversation history, and the new prompt to the AI service.
-- [ ] Define and validate structured output containing a reply and optional board update.
-- [ ] Apply only valid updates to the authenticated user's board.
-- [ ] Persist successful AI updates and return the updated board.
+- [x] Send board JSON, conversation history, and the new prompt to the AI service.
+- [x] Define and validate structured output containing a reply and optional board update.
+- [x] Apply only valid updates to the authenticated user's board.
+- [x] Persist successful AI updates and return the updated board.
 
 ### Tests and success criteria
 

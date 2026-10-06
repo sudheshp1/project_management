@@ -54,7 +54,8 @@ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 - `KanbanBoard` loads the board from the API and saves every mutation through `src/lib/api.ts`; each call returns the full board, which replaces local state (optimistic updates roll back on failure). `src/lib/kanban.ts` owns the `BoardData` shape (`columns` with ordered `cardIds`, plus a `cards` map) and the pure card-move logic; keep board logic there, separate from components.
 - Persistence: SQLite in `backend/app/db.py` (schema and design in `docs/database-schema.json` and `docs/DATABASE.md`), created on startup at `backend/data/app.db` (`/app/data` is a named volume in Docker). Board routes under `/api/board`, `/api/columns`, `/api/cards` return the full board in the frontend `BoardData` shape; route list in `backend/AGENTS.md`.
 - AI: `backend/app/ai.py` calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env` (passed to the container via `env_file` in `compose.yaml`; never baked into the image).
-- Planned (see `docs/PLAN.md`): a chat endpoint returning structured output that can create/edit/move cards, and an AI chat sidebar.
+- Chat: `POST /api/chat` (`backend/app/chat.py`) sends the board JSON, client-held history, and the new message, requires strict structured output (`reply` plus `create`/`update`/`move` operations), validates every operation against the user's board before applying any, and returns `{reply, board}`.
+- Planned (see `docs/PLAN.md`): the AI chat sidebar in the frontend.
 
 ## Conventions
 

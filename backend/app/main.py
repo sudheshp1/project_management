@@ -8,9 +8,17 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from app import db
+from app import ai, chat, db
 from app.auth import SESSION_COOKIE, authenticate, current_user, end_session
-from app.schemas import Board, CardCreate, CardMove, CardUpdate, ColumnUpdate
+from app.schemas import (
+    Board,
+    CardCreate,
+    CardMove,
+    CardUpdate,
+    ChatRequest,
+    ChatResponse,
+    ColumnUpdate,
+)
 
 
 @asynccontextmanager
@@ -25,6 +33,13 @@ app = FastAPI(title="Project Management API", lifespan=lifespan)
 @app.exception_handler(db.NotFound)
 def not_found(request: Request, exc: db.NotFound) -> JSONResponse:
     return JSONResponse({"detail": "Not found"}, status_code=status.HTTP_404_NOT_FOUND)
+
+
+@app.exception_handler(ai.AIError)
+def ai_error(request: Request, exc: ai.AIError) -> JSONResponse:
+    if isinstance(exc, ai.AINotConfigured):
+        return JSONResponse({"detail": "AI is not configured"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+    return JSONResponse({"detail": str(exc)}, status_code=status.HTTP_502_BAD_GATEWAY)
 
 
 class Credentials(BaseModel):
@@ -107,6 +122,11 @@ def delete_card(card_id: str, conn: Connection, board_id: BoardId) -> Board:
 def move_card(card_id: str, body: CardMove, conn: Connection, board_id: BoardId) -> Board:
     db.move_card(conn, board_id, card_id, body.column_id, body.position)
     return db.get_board(conn, board_id)
+
+
+@app.post("/api/chat")
+def send_chat(body: ChatRequest, conn: Connection, board_id: BoardId) -> ChatResponse:
+    return chat.chat(conn, board_id, body.history, body.message)
 
 
 static_directory = Path(__file__).parent.parent / "static"

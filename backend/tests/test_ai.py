@@ -49,6 +49,7 @@ def test_sends_response_format_when_given(api_key) -> None:
     ai.complete([], response_format=response_format, transport=transport(handler))
 
     assert seen["body"]["response_format"] == response_format
+    assert seen["body"]["provider"] == {"require_parameters": True}
 
 
 def test_missing_key_fails_without_calling_upstream(monkeypatch) -> None:

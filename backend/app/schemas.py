@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
@@ -43,3 +45,18 @@ class CardUpdate(ApiModel):
 class CardMove(ApiModel):
     column_id: str
     position: int = Field(ge=0)
+
+
+class ChatMessage(ApiModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=10000)
+
+
+class ChatRequest(ApiModel):
+    history: list[ChatMessage] = Field(default=[], max_length=50)
+    message: str = Field(min_length=1, max_length=10000)
+
+
+class ChatResponse(ApiModel):
+    reply: str
+    board: Board

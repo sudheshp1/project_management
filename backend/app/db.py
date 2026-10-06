@@ -219,14 +219,17 @@ def delete_card(conn: sqlite3.Connection, board_id: int, api_id: str) -> None:
         _write_order(conn, column_id, _card_ids(conn, column_id))
 
 
-def move_card(conn: sqlite3.Connection, board_id: int, api_id: str, key: str, position: int) -> None:
+def move_card(
+    conn: sqlite3.Connection, board_id: int, api_id: str, key: str, position: int | None
+) -> None:
+    """Move a card to a 0-based position in a column; None appends it to the end."""
     card_id = parse_card_id(api_id)
     source_id = _card_column_id(conn, board_id, api_id)
     target_id = _column_id(conn, board_id, key)
     with conn:
         source = [i for i in _card_ids(conn, source_id) if i != card_id]
         target = source if source_id == target_id else _card_ids(conn, target_id)
-        target.insert(min(position, len(target)), card_id)
+        target.insert(len(target) if position is None else min(position, len(target)), card_id)
         if source_id != target_id:
             _write_order(conn, source_id, source)
         _write_order(conn, target_id, target)
