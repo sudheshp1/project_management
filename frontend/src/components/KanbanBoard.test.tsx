@@ -6,12 +6,12 @@ const getFirstColumn = () => screen.getAllByTestId(/column-/i)[0];
 
 describe("KanbanBoard", () => {
   it("renders five columns", () => {
-    render(<KanbanBoard />);
+    render(<KanbanBoard onLogout={() => {}} />);
     expect(screen.getAllByTestId(/column-/i)).toHaveLength(5);
   });
 
   it("renames a column", async () => {
-    render(<KanbanBoard />);
+    render(<KanbanBoard onLogout={() => {}} />);
     const column = getFirstColumn();
     const input = within(column).getByLabelText("Column title");
     await userEvent.clear(input);
@@ -20,7 +20,7 @@ describe("KanbanBoard", () => {
   });
 
   it("adds and removes a card", async () => {
-    render(<KanbanBoard />);
+    render(<KanbanBoard onLogout={() => {}} />);
     const column = getFirstColumn();
     const user = userEvent.setup();
     await user.click(within(column).getByRole("button", { name: /add a card/i }));
@@ -43,7 +43,7 @@ describe("KanbanBoard", () => {
   });
 
   it("adds the default details when the details are blank", async () => {
-    render(<KanbanBoard />);
+    render(<KanbanBoard onLogout={() => {}} />);
     const column = getFirstColumn();
     const user = userEvent.setup();
     await user.click(within(column).getByRole("button", { name: /add a card/i }));
@@ -54,7 +54,7 @@ describe("KanbanBoard", () => {
   });
 
   it("cancels adding a card", async () => {
-    render(<KanbanBoard />);
+    render(<KanbanBoard onLogout={() => {}} />);
     const column = getFirstColumn();
     const user = userEvent.setup();
     await user.click(within(column).getByRole("button", { name: /add a card/i }));

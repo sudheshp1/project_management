@@ -56,14 +56,14 @@
 - Integration-test the production container serving the board at `/`.
 - Focused unit and browser integration tests cover the shipped Kanban interactions.
 
-## Part 4: MVP sign-in
+## Part 4: MVP sign-in (Complete)
 
 ### Checklist
 
-- [ ] Require login before board access.
-- [ ] Validate only `user` / `password`.
-- [ ] Persist local authenticated state, protect board API routes, and implement logout.
-- [ ] Prevent unauthenticated access to board UI and data.
+- [x] Require login before board access.
+- [x] Validate only `user` / `password`.
+- [x] Persist local authenticated state, protect board API routes, and implement logout.
+- [x] Prevent unauthenticated access to board UI and data.
 
 ### Tests and success criteria
 

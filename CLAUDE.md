@@ -22,14 +22,14 @@ docker compose down              # or scripts/stop-<platform>
 Frontend (run in `frontend/`):
 
 ```bash
-npm run dev                                  # Next dev server on :3000
+npm run dev                                  # Next dev server on :3000, proxies /api to :8000
 npm run lint
 npm run build                                # static export to frontend/out
 npm run test:unit                            # Vitest (jsdom), src/**/*.test.ts(x)
 npx vitest run src/lib/kanban.test.ts        # single test file
 npx vitest run -t "test name"                # single test by name
 npm run test:coverage
-npm run test:e2e                             # Playwright (Chromium); auto-starts dev server
+npm run test:e2e                             # Playwright (Chromium); auto-starts backend and dev server
 npx playwright test tests/kanban.spec.ts -g "name"
 ```
 
@@ -42,15 +42,16 @@ uv run pytest tests/test_main.py::test_health_returns_ok
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-`app/main.py` mounts `backend/static/` at `/`, so that directory must exist for the app (and tests) to import. In the container it holds the frontend build.
+`app/main.py` mounts `backend/static/` at `/`; in the container it holds the frontend build. Locally it may be empty, so use `npm run dev` on :3000 for the UI.
 
 ## Architecture
 
 - Single Docker image built in two stages (`Dockerfile`): Node builds the Next.js app as a static export (`output: "export"` in `next.config.ts`, emitted to `frontend/out`), then a `uv` Python image copies it to `/app/static` and runs FastAPI via uvicorn on port 8000.
 - FastAPI (`backend/app/main.py`) serves API routes under `/api/` and mounts the static frontend at `/` last. All new API routes must stay under `/api/` and be registered before the static mount so they are not shadowed.
-- The frontend is a static client-side app: no Next.js server features (API routes, SSR, server actions) are available at runtime, since only the exported files are served. It must talk to the backend via `/api/*` fetches.
+- Auth: hardcoded `user` / `password`, an HttpOnly `session` cookie, and an in-memory session store in `backend/app/auth.py`. Protect API routes with `Depends(current_user)`. The frontend checks `/api/me` on load and shows the login form when it returns 401.
+- The frontend is a static client-side app: no Next.js server features (API routes, SSR, server actions) are available at runtime, since only the exported files are served. It must talk to the backend via `/api/*` fetches; during `next dev`, `next.config.ts` proxies `/api/*` to the backend on :8000.
 - Frontend state currently lives in React state inside `KanbanBoard`, seeded from `initialData` in `src/lib/kanban.ts`. `kanban.ts` owns the `BoardData` shape (`columns` with ordered `cardIds`, plus a `cards` map) and the pure card-move logic; keep board logic there, separate from components, so it can be swapped for backend data.
-- Planned (see `docs/PLAN.md`): hardcoded `user`/`password` sign-in, SQLite persistence (auto-created, multi-user schema, one board per user), and an AI chat sidebar that calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env`, returning structured output that can create/edit/move cards.
+- Planned (see `docs/PLAN.md`): SQLite persistence (auto-created, multi-user schema, one board per user), and an AI chat sidebar that calls OpenRouter (`openai/gpt-oss-120b`) server-side with `OPENROUTER_API_KEY` from the root `.env`, returning structured output that can create/edit/move cards.
 
 ## Conventions
 

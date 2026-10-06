@@ -2,6 +2,8 @@
 
 This directory contains the FastAPI application and its tests. The container serves the exported frontend build from `static/` and exposes `GET /api/health`.
 
+Authentication lives in `app/auth.py`: `POST /api/login` validates the hardcoded `user` / `password` and sets an HttpOnly `session` cookie backed by an in-memory session store (sessions reset on restart), `POST /api/logout` ends it, and `GET /api/me` returns the signed-in user. Protect routes with `Depends(current_user)`.
+
 ## Commands
 
 ```bash
