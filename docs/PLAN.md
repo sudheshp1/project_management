@@ -71,14 +71,14 @@
 - Integration-test failed and successful login, protected access, refresh, and logout.
 - Authentication success, failure, session restoration, and logout are covered by focused tests.
 
-## Part 5: Database design approval
+## Part 5: Database design approval (Complete)
 
 ### Checklist
 
-- [ ] Propose a SQLite schema for users, one board per user, fixed columns, cards, and ordering.
-- [ ] Save the proposed schema as JSON in `docs/`.
-- [ ] Document initialization, ownership boundaries, and migrations in `docs/`.
-- [ ] Obtain user approval before implementing persistence.
+- [x] Propose a SQLite schema for users, one board per user, fixed columns, cards, and ordering.
+- [x] Save the proposed schema as JSON in `docs/`.
+- [x] Document initialization, ownership boundaries, and migrations in `docs/`.
+- [x] Obtain user approval before implementing persistence.
 
 ### Tests and success criteria
 

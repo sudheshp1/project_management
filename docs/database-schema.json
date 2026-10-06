@@ -1,0 +1,96 @@
+{
+  "database": "sqlite",
+  "version": 1,
+  "pragmas": {
+    "foreign_keys": "ON"
+  },
+  "tables": [
+    {
+      "name": "users",
+      "description": "One row per person who can sign in. The MVP only creates 'user'.",
+      "columns": [
+        { "name": "id", "type": "INTEGER", "primary_key": true },
+        { "name": "username", "type": "TEXT", "nullable": false, "unique": true }
+      ]
+    },
+    {
+      "name": "boards",
+      "description": "Exactly one board per user, enforced by the unique user_id.",
+      "columns": [
+        { "name": "id", "type": "INTEGER", "primary_key": true },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "unique": true,
+          "references": { "table": "users", "column": "id", "on_delete": "CASCADE" }
+        }
+      ]
+    },
+    {
+      "name": "columns",
+      "description": "The fixed columns of a board. Created with the board; only the title changes.",
+      "columns": [
+        { "name": "id", "type": "INTEGER", "primary_key": true },
+        {
+          "name": "board_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "references": { "table": "boards", "column": "id", "on_delete": "CASCADE" }
+        },
+        {
+          "name": "key",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "Stable identifier exposed to the API as the column id, e.g. 'col-review'."
+        },
+        { "name": "title", "type": "TEXT", "nullable": false },
+        {
+          "name": "position",
+          "type": "INTEGER",
+          "nullable": false,
+          "description": "Left-to-right order, 0-based."
+        }
+      ],
+      "unique": [["board_id", "key"], ["board_id", "position"]]
+    },
+    {
+      "name": "cards",
+      "description": "Cards on a board. Ownership is card -> column -> board -> user.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "primary_key": true,
+          "description": "Exposed to the API as 'card-<id>'."
+        },
+        {
+          "name": "column_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "references": { "table": "columns", "column": "id", "on_delete": "CASCADE" }
+        },
+        { "name": "title", "type": "TEXT", "nullable": false },
+        { "name": "details", "type": "TEXT", "nullable": false, "default": "''" },
+        {
+          "name": "position",
+          "type": "INTEGER",
+          "nullable": false,
+          "description": "Top-to-bottom order within the column, 0-based and contiguous."
+        }
+      ],
+      "indexes": [{ "name": "cards_column_position", "columns": ["column_id", "position"] }]
+    }
+  ],
+  "seed": {
+    "description": "Created in one transaction the first time a user signs in and has no board.",
+    "columns": [
+      { "key": "col-backlog", "title": "Backlog", "position": 0 },
+      { "key": "col-discovery", "title": "Discovery", "position": 1 },
+      { "key": "col-progress", "title": "In Progress", "position": 2 },
+      { "key": "col-review", "title": "Review", "position": 3 },
+      { "key": "col-done", "title": "Done", "position": 4 }
+    ],
+    "cards": "The eight sample cards from frontend/src/lib/kanban.ts initialData, in the same columns and order."
+  }
+}
