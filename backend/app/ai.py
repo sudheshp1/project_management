@@ -34,7 +34,10 @@ def complete(
     try:
         with httpx.Client(transport=transport, timeout=TIMEOUT_SECONDS) as client:
             response = client.post(
-                OPENROUTER_URL, json=payload, headers={"Authorization": f"Bearer {api_key}"}
+                # OPENROUTER_URL can point at a fake server for end-to-end tests.
+                os.environ.get("OPENROUTER_URL", OPENROUTER_URL),
+                json=payload,
+                headers={"Authorization": f"Bearer {api_key}"},
             )
     except httpx.HTTPError as exc:
         raise AIError(f"OpenRouter request failed: {type(exc).__name__}") from None

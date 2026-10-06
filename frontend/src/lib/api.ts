@@ -6,11 +6,21 @@ export class ApiError extends Error {
   }
 }
 
-const request = async (
+export type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type ChatResponse = {
+  reply: string;
+  board: BoardData;
+};
+
+const request = async <T = BoardData>(
   url: string,
   method = "GET",
   body?: unknown
-): Promise<BoardData> => {
+): Promise<T> => {
   const response = await fetch(url, {
     method,
     headers: body === undefined ? undefined : { "Content-Type": "application/json" },
@@ -35,3 +45,6 @@ export const deleteCard = (cardId: string) =>
 
 export const moveCardTo = (cardId: string, columnId: string, position: number) =>
   request(`/api/cards/${cardId}/move`, "POST", { columnId, position });
+
+export const sendChat = (history: ChatMessage[], message: string) =>
+  request<ChatResponse>("/api/chat", "POST", { history, message });

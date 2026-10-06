@@ -2,19 +2,19 @@
 
 ## Quality gates
 
-- [ ] Add focused unit tests for changed logic and integration tests for API, database, auth, static serving, and frontend-to-backend workflows.
-- [ ] Use coverage reports only when they help identify untested critical behavior; do not add tests solely to meet a coverage percentage.
-- [ ] Run linting, unit tests with coverage, integration tests, and a production build before completing each applicable part.
-- [ ] Mock OpenRouter in automated tests. Run a live connectivity check only when `OPENROUTER_API_KEY` is configured locally.
+- [x] Add focused unit tests for changed logic and integration tests for API, database, auth, static serving, and frontend-to-backend workflows.
+- [x] Use coverage reports only when they help identify untested critical behavior; do not add tests solely to meet a coverage percentage.
+- [x] Run linting, unit tests with coverage, integration tests, and a production build before completing each applicable part.
+- [x] Mock OpenRouter in automated tests. Run a live connectivity check only when `OPENROUTER_API_KEY` is configured locally.
 
-## Part 1: Planning and frontend documentation
+## Part 1: Planning and frontend documentation (Complete)
 
 ### Checklist
 
 - [x] Inspect the existing frontend structure, dependencies, UI behavior, and test setup.
 - [x] Create `frontend/AGENTS.md` with architecture, conventions, commands, and feature boundaries.
 - [x] Expand this plan into implementation checklists, validation steps, and success criteria.
-- [ ] Obtain explicit user approval before beginning scaffolding.
+- [x] Obtain explicit user approval before beginning scaffolding.
 
 ### Tests and success criteria
 
@@ -146,15 +146,15 @@
 - Integration-test chat-only replies, valid updates, invalid output, persistence, and isolation.
 - Focused backend unit and integration tests cover structured response validation and persistence.
 
-## Part 10: AI chat sidebar
+## Part 10: AI chat sidebar (Complete)
 
 ### Checklist
 
-- [ ] Add a responsive, accessible chat sidebar using the established color scheme.
-- [ ] Display history, sending state, errors, and model replies.
-- [ ] Send prompts to the authenticated backend API.
-- [ ] Refresh the visible board automatically after AI changes.
-- [ ] Preserve existing board interactions.
+- [x] Add a responsive, accessible chat sidebar using the established color scheme.
+- [x] Display history, sending state, errors, and model replies.
+- [x] Send prompts to the authenticated backend API.
+- [x] Refresh the visible board automatically after AI changes.
+- [x] Preserve existing board interactions.
 
 ### Tests and success criteria
 

@@ -21,6 +21,10 @@ export const mockApi = ({
     failBoard,
     failMutations,
     board: structuredClone(initialData) as BoardData,
+    // /api/chat: the reply to send, an optional board change, and failure status.
+    chatReply: "Here is your answer.",
+    chatChange: undefined as ((board: BoardData) => void) | undefined,
+    chatStatus: 200,
   };
 
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
@@ -43,6 +47,13 @@ export const mockApi = ({
     }
     if (url === "/api/board") {
       return state.failBoard ? json({ detail: "Error" }, 500) : json(state.board);
+    }
+    if (url === "/api/chat") {
+      if (state.chatStatus !== 200) {
+        return json({ detail: "Error" }, state.chatStatus);
+      }
+      state.chatChange?.(state.board);
+      return json({ reply: state.chatReply, board: structuredClone(state.board) });
     }
     if (state.failMutations) {
       return json({ detail: "Error" }, 500);

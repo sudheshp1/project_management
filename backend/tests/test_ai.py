@@ -52,6 +52,19 @@ def test_sends_response_format_when_given(api_key) -> None:
     assert seen["body"]["provider"] == {"require_parameters": True}
 
 
+def test_url_can_be_overridden(api_key, monkeypatch) -> None:
+    monkeypatch.setenv("OPENROUTER_URL", "http://127.0.0.1:9999/fake")
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["url"] = str(request.url)
+        return reply("ok")
+
+    ai.complete([], transport=transport(handler))
+
+    assert seen["url"] == "http://127.0.0.1:9999/fake"
+
+
 def test_missing_key_fails_without_calling_upstream(monkeypatch) -> None:
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
