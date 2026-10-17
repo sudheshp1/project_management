@@ -42,8 +42,8 @@ def test_create_update_delete_card(conn) -> None:
 
     db.delete_card(conn, board_id, "card-6")
     assert column_cards(db.get_board(conn, board_id), "col-review") == [card_id]
-    positions = conn.execute("SELECT position FROM cards WHERE id = ?", (int(card_id[5:]),)).fetchone()
-    assert positions[0] == 0
+    row = conn.execute("SELECT position FROM cards WHERE id = ?", (db.parse_card_id(card_id),)).fetchone()
+    assert row["position"] == 0
 
 
 def test_move_card_within_and_across_columns(conn) -> None:

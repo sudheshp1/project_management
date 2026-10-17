@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { PlusIcon } from "@/components/icons";
 
 const initialFormState = { title: "", details: "" };
 
@@ -10,18 +11,23 @@ export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formState, setFormState] = useState(initialFormState);
 
+  const close = () => {
+    setIsOpen(false);
+    setFormState(initialFormState);
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!formState.title.trim()) {
+    const title = formState.title.trim();
+    if (!title) {
       return;
     }
-    onAdd(formState.title.trim(), formState.details.trim());
-    setFormState(initialFormState);
-    setIsOpen(false);
+    onAdd(title, formState.details.trim());
+    close();
   };
 
   return (
-    <div className="mt-4">
+    <div className="mt-3">
       {isOpen ? (
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -51,10 +57,7 @@ export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setIsOpen(false);
-                setFormState(initialFormState);
-              }}
+              onClick={close}
               className="rounded-full border border-[var(--stroke)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--gray-text)] transition hover:text-[var(--navy-dark)]"
             >
               Cancel
@@ -65,8 +68,9 @@ export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="w-full rounded-full border border-dashed border-[var(--stroke)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--primary-blue)] transition hover:border-[var(--primary-blue)]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--stroke)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--primary-blue)] transition hover:border-[var(--primary-blue)] hover:bg-[var(--surface)]"
         >
+          <PlusIcon />
           Add a card
         </button>
       )}

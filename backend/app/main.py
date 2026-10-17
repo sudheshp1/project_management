@@ -6,7 +6,6 @@ from typing import Annotated
 from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 from app import ai, chat, db
 from app.auth import SESSION_COOKIE, authenticate, current_user, end_session
@@ -18,6 +17,8 @@ from app.schemas import (
     ChatRequest,
     ChatResponse,
     ColumnUpdate,
+    Credentials,
+    User,
 )
 
 
@@ -35,20 +36,14 @@ def not_found(request: Request, exc: db.NotFound) -> JSONResponse:
     return JSONResponse({"detail": "Not found"}, status_code=status.HTTP_404_NOT_FOUND)
 
 
+@app.exception_handler(ai.AINotConfigured)
+def ai_not_configured(request: Request, exc: ai.AINotConfigured) -> JSONResponse:
+    return JSONResponse({"detail": "AI is not configured"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
 @app.exception_handler(ai.AIError)
 def ai_error(request: Request, exc: ai.AIError) -> JSONResponse:
-    if isinstance(exc, ai.AINotConfigured):
-        return JSONResponse({"detail": "AI is not configured"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
     return JSONResponse({"detail": str(exc)}, status_code=status.HTTP_502_BAD_GATEWAY)
-
-
-class Credentials(BaseModel):
-    username: str
-    password: str
-
-
-class User(BaseModel):
-    username: str
 
 
 @app.get("/api/health")

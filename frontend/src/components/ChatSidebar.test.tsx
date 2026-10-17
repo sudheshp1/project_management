@@ -5,6 +5,9 @@ import { ChatSidebar } from "@/components/ChatSidebar";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { mockApi } from "@/test/mockApi";
 
+const renderSidebar = ({ onBoardUpdate = () => {}, onSessionExpired = () => {} } = {}) =>
+  render(<ChatSidebar onBoardUpdate={onBoardUpdate} onSessionExpired={onSessionExpired} />);
+
 const send = async (text: string) => {
   const user = userEvent.setup();
   await user.type(screen.getByLabelText("Message"), text);
@@ -23,7 +26,7 @@ afterEach(() => {
 describe("ChatSidebar", () => {
   it("shows an empty conversation", () => {
     mockApi();
-    render(<ChatSidebar onBoardUpdate={() => {}} onSessionExpired={() => {}} />);
+    renderSidebar();
 
     expect(screen.getByRole("complementary", { name: "AI assistant" })).toBeInTheDocument();
     expect(screen.getByText("No messages yet")).toBeInTheDocument();
@@ -33,7 +36,7 @@ describe("ChatSidebar", () => {
   it("sends messages with history and shows replies", async () => {
     const { fetchMock, state } = mockApi();
     const onBoardUpdate = vi.fn();
-    render(<ChatSidebar onBoardUpdate={onBoardUpdate} onSessionExpired={() => {}} />);
+    renderSidebar({ onBoardUpdate });
     const log = screen.getByRole("log");
 
     state.chatReply = "First reply";
@@ -59,7 +62,7 @@ describe("ChatSidebar", () => {
     const { fetchMock } = mockApi();
     let respond: (value: Response) => void = () => {};
     fetchMock.mockImplementationOnce(() => new Promise((resolve) => (respond = resolve)));
-    render(<ChatSidebar onBoardUpdate={() => {}} onSessionExpired={() => {}} />);
+    renderSidebar();
 
     await send("Hello");
 
@@ -73,7 +76,7 @@ describe("ChatSidebar", () => {
 
   it("sends on Enter and keeps Shift+Enter for new lines", async () => {
     const { fetchMock } = mockApi();
-    render(<ChatSidebar onBoardUpdate={() => {}} onSessionExpired={() => {}} />);
+    renderSidebar();
     const input = screen.getByLabelText("Message");
 
     await userEvent.type(input, "Line one{Shift>}{Enter}{/Shift}Line two");
@@ -88,7 +91,7 @@ describe("ChatSidebar", () => {
     const { state } = mockApi();
     state.chatStatus = 502;
     const onBoardUpdate = vi.fn();
-    render(<ChatSidebar onBoardUpdate={onBoardUpdate} onSessionExpired={() => {}} />);
+    renderSidebar({ onBoardUpdate });
 
     await send("Move everything");
 
@@ -102,7 +105,7 @@ describe("ChatSidebar", () => {
     const { state } = mockApi();
     state.chatStatus = 401;
     const onSessionExpired = vi.fn();
-    render(<ChatSidebar onBoardUpdate={() => {}} onSessionExpired={onSessionExpired} />);
+    renderSidebar({ onSessionExpired });
 
     await send("Hello");
 

@@ -173,4 +173,7 @@ test("shows the chat beside the board on wide screens", async ({ page }) => {
   }
   expect(sidebar.x).toBeGreaterThan(board.x + board.width);
   expect(board.width).toBeGreaterThan(200);
+  const first = await page.getByTestId("column-col-backlog").boundingBox();
+  expect(first?.y).toBe(board.y);
+  expect(board.x + board.width).toBeLessThanOrEqual(sidebar.x);
 });

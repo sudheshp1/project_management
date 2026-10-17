@@ -10,17 +10,15 @@ from app.main import app
 @pytest.fixture
 def fake_ai(monkeypatch):
     """Replace OpenRouter with a fake that records requests and returns a queued reply."""
-    calls = []
-    state = {"content": json.dumps({"reply": "Hi", "operations": []}), "error": None}
+    state = {"content": json.dumps({"reply": "Hi", "operations": []}), "error": None, "calls": []}
 
     def complete(messages, response_format=None, transport=None):
-        calls.append({"messages": messages, "response_format": response_format})
+        state["calls"].append({"messages": messages, "response_format": response_format})
         if state["error"]:
             raise state["error"]
         return state["content"]
 
     monkeypatch.setattr(ai, "complete", complete)
-    state["calls"] = calls
     return state
 
 
@@ -130,9 +128,8 @@ def test_upstream_error_returns_502(client, fake_ai) -> None:
     assert response.json() == {"detail": "OpenRouter returned status 500"}
 
 
-def test_cannot_change_another_users_board(client, fake_ai) -> None:
+def test_cannot_change_another_users_board(client, conn, fake_ai) -> None:
     client.get("/api/board")
-    conn = db.connect()
     other_board = db.board_id_for(conn, "other")
     other_card = column(db.get_board(conn, other_board), "col-backlog")[0]
     fake_ai["content"] = json.dumps({"reply": "x", "operations": [
@@ -143,7 +140,6 @@ def test_cannot_change_another_users_board(client, fake_ai) -> None:
     assert client.post("/api/chat", json={"message": "x"}).status_code == 502
     assert db.get_board(conn, other_board)["cards"][other_card]["title"] == "Align roadmap themes"
     assert other_card not in fake_ai["calls"][0]["messages"][0]["content"]
-    conn.close()
 
 
 @pytest.mark.parametrize(

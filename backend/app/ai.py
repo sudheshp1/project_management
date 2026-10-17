@@ -48,7 +48,7 @@ def complete(
     try:
         content = response.json()["choices"][0]["message"]["content"]
     except (ValueError, KeyError, IndexError, TypeError):
-        raise AIError("OpenRouter returned an unexpected response") from None
+        content = None
     if not isinstance(content, str):
         raise AIError("OpenRouter returned an unexpected response")
     return content

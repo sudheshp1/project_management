@@ -98,9 +98,8 @@ def test_unknown_ids_return_404(client, method, path, body) -> None:
     assert client.request(method, path, json=body).status_code == 404
 
 
-def test_cannot_touch_another_users_cards(client) -> None:
+def test_cannot_touch_another_users_cards(client, conn) -> None:
     client.get("/api/board")
-    conn = db.connect()
     other_board = db.board_id_for(conn, "other")
     other_card = db.get_board(conn, other_board)["columns"][0]["cardIds"][0]
 
@@ -109,4 +108,3 @@ def test_cannot_touch_another_users_cards(client) -> None:
     assert client.post(f"/api/cards/{other_card}/move", json={"columnId": "col-done", "position": 0}).status_code == 404
     assert other_card not in client.get("/api/board").json()["cards"]
     assert db.get_board(conn, other_board)["cards"][other_card]["title"] == "Align roadmap themes"
-    conn.close()

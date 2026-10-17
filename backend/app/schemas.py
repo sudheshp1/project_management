@@ -6,6 +6,15 @@ from pydantic.alias_generators import to_camel
 Title = Field(min_length=1, max_length=200)
 
 
+class Credentials(BaseModel):
+    username: str
+    password: str
+
+
+class User(BaseModel):
+    username: str
+
+
 class ApiModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, extra="forbid")
 

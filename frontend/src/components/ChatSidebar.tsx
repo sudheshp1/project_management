@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import clsx from "clsx";
 import { ApiError, sendChat, type ChatMessage } from "@/lib/api";
 import type { BoardData } from "@/lib/kanban";
+import { SendIcon } from "@/components/icons";
 
 type ChatSidebarProps = {
   onBoardUpdate: (board: BoardData) => void;
@@ -29,13 +30,14 @@ export const ChatSidebar = ({ onBoardUpdate, onSessionExpired }: ChatSidebarProp
     }
 
     const history = messages;
-    setMessages([...history, { role: "user", content: message }]);
+    const sent: ChatMessage[] = [...history, { role: "user", content: message }];
+    setMessages(sent);
     setInput("");
     setSending(true);
     setError(false);
     try {
       const { reply, board } = await sendChat(history, message);
-      setMessages([...history, { role: "user", content: message }, { role: "assistant", content: reply }]);
+      setMessages([...sent, { role: "assistant", content: reply }]);
       onBoardUpdate(board);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -60,15 +62,14 @@ export const ChatSidebar = ({ onBoardUpdate, onSessionExpired }: ChatSidebarProp
   return (
     <aside
       aria-label="AI assistant"
-      className="flex max-h-[720px] min-h-[420px] flex-col rounded-3xl border border-[var(--stroke)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow)] 2xl:sticky 2xl:top-6 2xl:h-[calc(100vh-3rem)] 2xl:max-h-none"
+      className="flex h-[560px] flex-col rounded-2xl border border-[var(--stroke)] bg-[var(--surface-strong)] p-3 shadow-[var(--shadow)] xl:h-auto xl:w-[300px] xl:shrink-0 2xl:w-[360px]"
     >
-      <div className="flex items-center gap-3">
-        <div className="h-2 w-10 rounded-full bg-[var(--accent-yellow)]" />
-        <h2 className="font-display text-lg font-semibold text-[var(--navy-dark)]">AI assistant</h2>
+      <div className="border-b-2 border-[var(--accent-yellow)] pb-2">
+        <h2 className="px-1 font-display text-base font-semibold text-[var(--navy-dark)]">AI assistant</h2>
+        <p className="px-1 text-xs leading-5 text-[var(--gray-text)]">
+          Ask about your board, or ask me to create, edit, or move cards.
+        </p>
       </div>
-      <p className="mt-2 text-xs leading-5 text-[var(--gray-text)]">
-        Ask about your board, or ask me to create, edit, or move cards.
-      </p>
 
       <div
         ref={logRef}
@@ -111,7 +112,7 @@ export const ChatSidebar = ({ onBoardUpdate, onSessionExpired }: ChatSidebarProp
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-3 space-y-2">
+      <form onSubmit={handleSubmit} className="mt-3 flex items-end gap-2">
         <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
@@ -120,14 +121,16 @@ export const ChatSidebar = ({ onBoardUpdate, onSessionExpired }: ChatSidebarProp
           aria-label="Message"
           rows={3}
           maxLength={10000}
-          className="w-full resize-none rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+          className="min-w-0 flex-1 resize-none rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
         />
         <button
           type="submit"
           disabled={sending || !input.trim()}
-          className="w-full rounded-full bg-[var(--secondary-purple)] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110 disabled:opacity-50"
+          aria-label={sending ? "Sending..." : "Send"}
+          title="Send"
+          className="rounded-xl bg-[var(--secondary-purple)] p-3 text-white transition hover:brightness-110 disabled:opacity-50"
         >
-          {sending ? "Sending..." : "Send"}
+          <SendIcon />
         </button>
       </form>
     </aside>

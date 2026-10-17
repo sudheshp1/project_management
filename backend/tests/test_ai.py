@@ -13,10 +13,6 @@ def api_key(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", KEY)
 
 
-def transport(handler):
-    return httpx.MockTransport(handler)
-
-
 def reply(content):
     return httpx.Response(200, json={"choices": [{"message": {"role": "assistant", "content": content}}]})
 
@@ -32,7 +28,7 @@ def test_builds_request_and_parses_reply(api_key) -> None:
 
     messages = [{"role": "user", "content": "What is 2+2?"}]
 
-    assert ai.complete(messages, transport=transport(handler)) == "4"
+    assert ai.complete(messages, transport=httpx.MockTransport(handler)) == "4"
     assert seen["url"] == ai.OPENROUTER_URL
     assert seen["auth"] == f"Bearer {KEY}"
     assert seen["body"] == {"model": "openai/gpt-oss-120b", "messages": messages}
@@ -46,7 +42,7 @@ def test_sends_response_format_when_given(api_key) -> None:
         seen["body"] = json.loads(request.content)
         return reply("{}")
 
-    ai.complete([], response_format=response_format, transport=transport(handler))
+    ai.complete([], response_format=response_format, transport=httpx.MockTransport(handler))
 
     assert seen["body"]["response_format"] == response_format
     assert seen["body"]["provider"] == {"require_parameters": True}
@@ -60,7 +56,7 @@ def test_url_can_be_overridden(api_key, monkeypatch) -> None:
         seen["url"] = str(request.url)
         return reply("ok")
 
-    ai.complete([], transport=transport(handler))
+    ai.complete([], transport=httpx.MockTransport(handler))
 
     assert seen["url"] == "http://127.0.0.1:9999/fake"
 
@@ -72,7 +68,7 @@ def test_missing_key_fails_without_calling_upstream(monkeypatch) -> None:
         raise AssertionError("should not call OpenRouter")
 
     with pytest.raises(ai.AINotConfigured):
-        ai.complete([], transport=transport(handler))
+        ai.complete([], transport=httpx.MockTransport(handler))
 
 
 @pytest.mark.parametrize(
@@ -87,7 +83,7 @@ def test_missing_key_fails_without_calling_upstream(monkeypatch) -> None:
 )
 def test_upstream_errors_raise_ai_error_without_leaking_key(api_key, response) -> None:
     with pytest.raises(ai.AIError) as error:
-        ai.complete([], transport=transport(lambda request: response))
+        ai.complete([], transport=httpx.MockTransport(lambda request: response))
 
     assert KEY not in str(error.value)
 
@@ -97,4 +93,4 @@ def test_network_failure_raises_ai_error(api_key) -> None:
         raise httpx.ConnectError("connection refused", request=request)
 
     with pytest.raises(ai.AIError, match="ConnectError"):
-        ai.complete([], transport=transport(handler))
+        ai.complete([], transport=httpx.MockTransport(handler))
